@@ -32,7 +32,7 @@ importers:
       vite: 6.0.7
       vite-plugin-dts: 4.5.0_6d43zrcmlruf6334masdkxxzha
 
-  packages/plugaable-react-component:
+  packages/pluggable-react-component:
     specifiers:
       lodash: ^4.17.21
       react: ^18.3.1
@@ -46,7 +46,7 @@ importers:
     specifiers:
       '@shinda-sakana/pluggable-react-component': workspace:*
     dependencies:
-      '@shinda-sakana/pluggable-react-component': link:../plugaable-react-component
+      '@shinda-sakana/pluggable-react-component': link:../pluggable-react-component
 
 packages:
 
