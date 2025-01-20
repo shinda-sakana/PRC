@@ -1,0 +1,22 @@
+{
+  "name": "@shinda-sakana/prc-inspector-plugin",
+  "version": "1.0.0",
+  "description": "",
+  "module": "src/index.tsx",
+  "typings": "src/index.tsx",
+  "publishConfig": {
+    "module": "dist/index.js",
+    "typings": "dist/type/index.d.ts"
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@shinda-sakana/pluggable-react-component": "workspace:*"
+  },
+  "keywords": [
+    "pluggable"
+  ],
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@shinda-sakana/pluggable-react-component",
+  "version": "1.0.0",
+  "description": "",
+  "module": "src/index.tsx",
+  "typings": "src/index.tsx",
+  "publishConfig": {
+    "module": "dist/index.js",
+    "typings": "dist/type/index.d.ts"
+  },
+  "type": "module",
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "showcase": "vite --config vite.showcase.config.ts"
+  },
+  "keywords": [
+    "react",
+    "component"
+  ],
+  "files": [
+    "README.md",
+    "LICENSE",
+    "dist",
+    "pnpm-lock.yaml",
+    "package.json"
+  ],
+  "author": "shinda-sakana",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  }
+}
