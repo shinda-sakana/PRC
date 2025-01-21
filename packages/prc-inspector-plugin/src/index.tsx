@@ -2,25 +2,41 @@ import React, { useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
 import { BaseFoundation, Plugin } from '@shinda-sakana/pluggable-react-component';
 import { PerformanceScope, Profiler } from './profiler';
+import { EventLogger } from './eventLogger';
+import { INSTANCE_KEY, SWAP_KEY } from './const';
+
+export * from './const';
 
 export interface RenderData {
   instance: InspectorInstance;
 }
+
+export type { BaseFoundation };
 
 export interface DataSwap {
   renderPopoverContent(anchor: HTMLElement, data: RenderData): void;
 }
 
 function getDataSwap(): DataSwap {
-  const swap = Reflect.get(window, '__prc_inspector_swap__') || {};
+  const swap = Reflect.get(window, SWAP_KEY) || {};
   return swap;
 }
 
 class InspectorInstance {
   private performanceScope: PerformanceScope;
-  foundation: BaseFoundation;
+  readonly logger: EventLogger;
+  readonly foundation: BaseFoundation;
   constructor(f: BaseFoundation) {
     this.foundation = f;
+    const logger = new EventLogger();
+    this.logger = logger;
+    f.listenAnyEvents((event, payloads, retValue) => {
+      logger.log({
+        event,
+        payloads,
+        retValue,
+      });
+    });
   }
   getPerformance() {
     return this.performanceScope.getPerformance();
@@ -46,32 +62,32 @@ class InspectorInstance {
     }, {});
     this.foundation.defineSlot(profilerSlotMap);
   }
-  getPerformanceScope() {
+  private getPerformanceScope() {
     if (!this.performanceScope) {
       this.performanceScope = new PerformanceScope();
     }
     return this.performanceScope;
   }
-  getSlots() {
+  private getSlots() {
     const slotMap = Reflect.get(this.foundation, 'slotMap') || {};
     return slotMap;
   }
 }
 
 function setGlobalInstance(instance: InspectorInstance) {
-  const instances = Reflect.get(window, '__prc_inspector_instances__') || new Set();
+  const instances = Reflect.get(window, INSTANCE_KEY) || new Set();
   instances.add(instance);
-  Reflect.set(window, '__prc_inspector_instances__', instances);
+  Reflect.set(window, INSTANCE_KEY, instances);
 }
 
 function removeGlobalInstance(instance: InspectorInstance) {
-  const instances = Reflect.get(window, '__prc_inspector_instances__');
+  const instances = Reflect.get(window, INSTANCE_KEY);
   if (!(instances instanceof Set)) {
     return;
   }
   instances.delete(instance);
   if (instances.size <= 0) {
-    Reflect.set(window, '__prc_inspector_instances__', void 0);
+    Reflect.set(window, INSTANCE_KEY, void 0);
   }
 }
 
@@ -116,7 +132,6 @@ export default function InspectorPlugin(): Plugin<BaseFoundation> {
             top: `${top}px`,
             left: `${left}px`,
           });
-          console.log(instance.getPerformance());
           renderPopoverContent(cover, {
             instance,
           });

@@ -45,6 +45,15 @@ export const Event = function <
           } catch (e) {
             console.error(e);
           }
+          const anyEventsHandlers = Reflect.get(this, 'anyEventsHandlers');
+          if (!(anyEventsHandlers instanceof Set)) {
+            return ret;
+          }
+          try {
+            anyEventsHandlers.forEach(handler => handler(event, args, ret));
+          } catch (e) {
+            console.error(e);
+          }
           return ret;
         }
       };
