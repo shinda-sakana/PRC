@@ -45,8 +45,12 @@ importers:
   packages/prc-inspector-plugin:
     specifiers:
       '@shinda-sakana/pluggable-react-component': workspace:*
+      react: ^18.3.1
+      react-dom: ^18.3.1
     dependencies:
       '@shinda-sakana/pluggable-react-component': link:../pluggable-react-component
+      react: 18.3.1
+      react-dom: 18.3.1_react@18.3.1
 
 packages:
 

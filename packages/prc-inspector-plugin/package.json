@@ -2,6 +2,7 @@
   "name": "@shinda-sakana/prc-inspector-plugin",
   "version": "1.0.0",
   "description": "",
+  "type": "module",
   "module": "src/index.tsx",
   "typings": "src/index.tsx",
   "publishConfig": {
@@ -9,10 +10,13 @@
     "typings": "dist/type/index.d.ts"
   },
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "dev": "vite --config vite.dev.config.ts"
   },
   "dependencies": {
-    "@shinda-sakana/pluggable-react-component": "workspace:*"
+    "@shinda-sakana/pluggable-react-component": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   },
   "keywords": [
     "pluggable"

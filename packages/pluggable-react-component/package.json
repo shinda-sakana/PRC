@@ -2,8 +2,8 @@
   "name": "@shinda-sakana/pluggable-react-component",
   "version": "1.0.0",
   "description": "Pluggable React Component",
-  "module": "src/index.tsx",
-  "typings": "src/index.tsx",
+  "module": "src/index.ts",
+  "typings": "src/index.ts",
   "publishConfig": {
     "module": "dist/index.js",
     "typings": "dist/type/index.d.ts"
