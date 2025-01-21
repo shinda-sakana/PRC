@@ -11,13 +11,13 @@ export class EventLogger {
     if (!this.isActive) {
       return;
     }
-    this.events.push(event);
+    this.events.push(Object.freeze(event));
   }
   clean() {
     this.events = [];
   }
   read() {
-    return Object.freeze(this.events);
+    return [...this.events];
   }
   activate() {
     this.isActive = true;

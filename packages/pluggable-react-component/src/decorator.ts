@@ -37,22 +37,22 @@ export const Event = function <
           const eventsMap = Reflect.get(this, 'eventsMap');
           const ret = old.call(this, ...args);
           const handlers = eventsMap[event as string];
-          if (!handlers) {
-            return ret;
-          }
-          try {
-            handlers.forEach(handler => handler(...args));
-          } catch (e) {
-            console.error(e);
-          }
           const anyEventsHandlers = Reflect.get(this, 'anyEventsHandlers');
-          if (!(anyEventsHandlers instanceof Set)) {
-            return ret;
-          }
-          try {
-            anyEventsHandlers.forEach(handler => handler(event, args, ret));
-          } catch (e) {
-            console.error(e);
+          switch (true) {
+            case (handlers instanceof Set): {
+              try {
+                handlers.forEach(handler => handler(...args));
+              } catch (e) {
+                console.error(e);
+              }
+            }
+            case (anyEventsHandlers instanceof Set): {
+              try {
+                anyEventsHandlers.forEach(handler => handler(event, args, ret));
+              } catch (e) {
+                console.error(e);
+              }
+            }
           }
           return ret;
         }
