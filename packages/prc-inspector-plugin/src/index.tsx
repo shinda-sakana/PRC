@@ -2,7 +2,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BaseFoundation, Plugin } from '@shinda-sakana/pluggable-react-component';
 import { INSTANCE_KEY } from './const';
-import { InspectorInstance } from './instance';
+import { InspectorInstance, removeGlobalInstance, setGlobalInstance } from './instance';
 import { getDataSwap } from './swap';
 
 export * from './const';
@@ -13,23 +13,6 @@ export interface RenderData {
 
 export type { InspectorInstance };
 export type { DataSwap } from './swap';
-
-function setGlobalInstance(instance: InspectorInstance) {
-  const instances = Reflect.get(window, INSTANCE_KEY) || new Set();
-  instances.add(instance);
-  Reflect.set(window, INSTANCE_KEY, instances);
-}
-
-function removeGlobalInstance(instance: InspectorInstance) {
-  const instances = Reflect.get(window, INSTANCE_KEY);
-  if (!(instances instanceof Set)) {
-    return;
-  }
-  instances.delete(instance);
-  if (instances.size <= 0) {
-    Reflect.set(window, INSTANCE_KEY, void 0);
-  }
-}
 
 class TargetWrapper extends React.Component {
   props: React.PropsWithChildren;

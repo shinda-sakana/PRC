@@ -3,6 +3,24 @@ import { PerformanceScope, Profiler } from './profiler';
 import { EventLogger } from './eventLogger';
 import { BaseFoundation } from '@shinda-sakana/pluggable-react-component';
 import { getDataSwap } from './swap';
+import { INSTANCE_KEY } from './const';
+
+export function setGlobalInstance(instance: InspectorInstance) {
+  const instances = Reflect.get(window, INSTANCE_KEY) || new Set();
+  instances.add(instance);
+  Reflect.set(window, INSTANCE_KEY, instances);
+}
+
+export function removeGlobalInstance(instance: InspectorInstance) {
+  const instances = Reflect.get(window, INSTANCE_KEY);
+  if (!(instances instanceof Set)) {
+    return;
+  }
+  instances.delete(instance);
+  if (instances.size <= 0) {
+    Reflect.set(window, INSTANCE_KEY, void 0);
+  }
+}
 
 export class InspectorInstance {
   private performanceScope: PerformanceScope;
