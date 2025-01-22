@@ -1,9 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BaseFoundation, Plugin } from '@shinda-sakana/pluggable-react-component';
-import { PerformanceScope, Profiler } from './profiler';
-import { EventLogger } from './eventLogger';
-import { INSTANCE_KEY, SWAP_KEY } from './const';
+import { INSTANCE_KEY } from './const';
+import { InspectorInstance } from './instance';
+import { getDataSwap } from './swap';
 
 export * from './const';
 
@@ -12,68 +12,7 @@ export interface RenderData {
 }
 
 export type { InspectorInstance };
-
-export interface DataSwap {
-  renderPopoverContent(anchor: HTMLElement, data: RenderData): void;
-  destroyPopoverContent(anchor?: HTMLElement): void;
-}
-
-function getDataSwap(): DataSwap {
-  const swap = Reflect.get(window, SWAP_KEY) || {};
-  return swap;
-}
-
-class InspectorInstance {
-  private performanceScope: PerformanceScope;
-  readonly logger: EventLogger;
-  readonly foundation: BaseFoundation;
-  constructor(f: BaseFoundation) {
-    this.foundation = f;
-    const logger = new EventLogger();
-    this.logger = logger;
-    f.listenAnyEvents((event, payloads, retValue) => {
-      logger.log({
-        event,
-        payloads,
-        retValue,
-      });
-    });
-  }
-  getPerformance() {
-    return this.performanceScope.getPerformance();
-  }
-  mountProfiler() {
-    const slotMap = this.getSlots();
-    const profilerSlotMap = Object.keys({ self: null, ...slotMap }).reduce((map, slotname) => {
-      const isRoot = slotname === 'self';
-      const slotImpl = (prev: React.ReactNode) => (
-        <Profiler
-          isActive
-          id={isRoot ? 'Root' : slotname}
-          isRoot={isRoot}
-          scope={this.getPerformanceScope()}
-        >
-          {prev}
-        </Profiler>
-      );
-      Object.assign(map, {
-        [slotname]: slotImpl,
-      });
-      return map;
-    }, {});
-    this.foundation.defineSlot(profilerSlotMap);
-  }
-  private getPerformanceScope() {
-    if (!this.performanceScope) {
-      this.performanceScope = new PerformanceScope();
-    }
-    return this.performanceScope;
-  }
-  private getSlots() {
-    const slotMap = Reflect.get(this.foundation, 'slotMap') || {};
-    return slotMap;
-  }
-}
+export type { DataSwap } from './swap';
 
 function setGlobalInstance(instance: InspectorInstance) {
   const instances = Reflect.get(window, INSTANCE_KEY) || new Set();
@@ -186,7 +125,14 @@ export default function InspectorPlugin(): Plugin<BaseFoundation> {
       },
       usePreRender() {
         const ref = useRef();
-        
+        const { isActive = () => false, sniffActive = () => null } = getDataSwap();
+        const [active, setActive] = useState(isActive());
+        useLayoutEffect(() => {
+          sniffActive(setActive);
+        }, []);
+        if (!active) {
+          return {};
+        }
         instance.mountProfiler();
         return {
           self: (prev) => (

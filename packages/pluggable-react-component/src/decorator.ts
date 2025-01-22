@@ -29,7 +29,7 @@ export const Event = function <
     _key: string,
     descriptor: TypedPropertyDescriptor<AnyF<VMap<M, E>>>
   ) {
-    const old = descriptor.value;    
+    const old = descriptor.value;
     if (isFunction(old)) {
       return {
         configurable: true,

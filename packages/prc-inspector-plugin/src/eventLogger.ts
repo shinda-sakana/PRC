@@ -20,6 +20,9 @@ export class EventLogger {
     return [...this.events];
   }
   activate() {
+    if (!this.isActive) {
+      this.clean();
+    }
     this.isActive = true;
   }
   disable() {
