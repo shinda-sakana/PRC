@@ -1,7 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import { BaseFoundation, Plugin } from '@shinda-sakana/pluggable-react-component';
-import { INSTANCE_KEY } from './const';
 import { InspectorInstance, removeGlobalInstance, setGlobalInstance } from './instance';
 import { getDataSwap } from './swap';
 
