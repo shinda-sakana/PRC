@@ -1,0 +1,24 @@
+.prc-inspector-popover {
+  &-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    padding: 12px;
+    box-sizing: border-box;
+  }
+  &-eventTrace {
+    &-controller {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background-color: var(--semi-color-bg-0);
+    }
+  }
+  &-tabpane {
+    position: relative;
+    overflow: overlay;
+    max-height: 60vh;
+  }
+}

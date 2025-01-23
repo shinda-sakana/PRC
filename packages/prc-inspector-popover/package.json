@@ -1,5 +1,6 @@
 {
-  "name": "@shinda-sakana/prc-inspector-plugin",
+  "name": "@shinda-sakana/prc-inspector-popover",
+  "private": true,
   "version": "1.0.0",
   "description": "",
   "type": "module",
@@ -14,12 +15,18 @@
     "dev": "vite --config vite.dev.config.ts"
   },
   "dependencies": {
+    "@douyinfe/semi-icons": "^2.73.0",
+    "@douyinfe/semi-ui": "^2.73.0",
     "@shinda-sakana/pluggable-react-component": "workspace:*",
+    "@shinda-sakana/prc-inspector-plugin": "workspace:*",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-flame-graph": "^1.4.0",
+    "react-inspector": "^6.0.2"
   },
   "keywords": [
-    "pluggable"
+    "pluggable",
+    "inspector"
   ],
   "author": "",
   "license": "ISC"

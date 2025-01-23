@@ -67,6 +67,7 @@ export class BaseFoundation<
 > {
   private slotMap: PartialSlotMap<X> = {};
   private eventsMap: EventsMap<E> = {};
+  private anyEventsHandlers: Set<DefaultHandler>;
   private base: AdapterBase<P, States<S>, C>;
   getState<K extends keyof S>(key: K): undefined | S[K] {
     if (!this.base) {
@@ -130,6 +131,16 @@ export class BaseFoundation<
     const handlers = this.eventsMap[event] || new Set();
     handlers.add(handler);
     this.eventsMap[event] = handlers;
+    return function remove() {
+      handlers.delete(handler);
+    };
+  }
+  listenAnyEvents(
+    handler: (event: string, payloads: unknown[], ret: unknown) => void
+  ) {
+    const handlers = this.anyEventsHandlers || new Set();
+    handlers.add(handler);
+    this.anyEventsHandlers = handlers;
     return function remove() {
       handlers.delete(handler);
     };

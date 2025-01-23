@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { loadPlugin } from '@shinda-sakana/pluggable-react-component';
+import InspectorPlugin from '@shinda-sakana/prc-inspector-plugin';
 import Component from './Component';
-import InspectorPlugin from '@/index';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
