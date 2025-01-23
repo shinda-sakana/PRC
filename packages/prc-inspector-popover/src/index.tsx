@@ -4,7 +4,10 @@ import { SWAP_KEY, DataSwap, InspectorInstance } from '@shinda-sakana/prc-inspec
 import { Button, Collapse, Descriptions, List, Popover, Space, Tabs } from '@douyinfe/semi-ui';
 import { BaseFoundation } from '@shinda-sakana/pluggable-react-component';
 import { ObjectInspector } from 'react-inspector';
-import { IconPlay, IconStop } from '@douyinfe/semi-icons';
+import { IconClose, IconPlay, IconStop } from '@douyinfe/semi-icons';
+import styles from './index.module.scss';
+
+const classPrefix = 'prc-inspector-popover';
 
 function FoundationPane(props: {
   foundation: BaseFoundation;
@@ -51,14 +54,16 @@ function EventsTracePane(props: {
   const buttonType = recording ? 'danger' : 'primary';
 
   return (
-    <Space vertical align={'start'} style={{ width: '100%' }}>
-      <Button
-        type={buttonType}
-        icon={buttonIcon}
-        onClick={() => setRecording(r => !r)}
-      >
-        {buttonTitle}
-      </Button>
+    <>
+      <div className={styles[`${classPrefix}-eventTrace-controller`]}>
+        <Button
+          type={buttonType}
+          icon={buttonIcon}
+          onClick={() => setRecording(r => !r)}
+        >
+          {buttonTitle}
+        </Button>
+      </div>
       <List
         style={{ width: '100%' }}
         dataSource={[...instance.logger.read()]}
@@ -82,7 +87,7 @@ function EventsTracePane(props: {
           />
         )}
       />
-    </Space>
+    </>
   )
 }
 
@@ -102,11 +107,11 @@ function PopoverContent(props: {
   }, []);
   return (
     <div style={{ padding: '12px', width: '600px' }}>
-      <Tabs contentStyle={{ maxHeight: '60vh', overflow: 'auto' }}>
-        <Tabs.TabPane tab={'Foundation'} itemKey={'foundation'}>
+      <Tabs>
+        <Tabs.TabPane className={styles[`${classPrefix}-tabpane`]} tab={'Foundation'} itemKey={'foundation'}>
           <FoundationPane foundation={instance.foundation} />
         </Tabs.TabPane>
-        <Tabs.TabPane tab={'Events Trace'} itemKey={'events-trace'}>
+        <Tabs.TabPane className={styles[`${classPrefix}-tabpane`]} tab={'Events Trace'} itemKey={'events-trace'}>
           <EventsTracePane instance={instance} />
         </Tabs.TabPane>
       </Tabs>
@@ -128,16 +133,26 @@ const swap: DataSwap = {
       activeSniffers.delete(handler);
     };
   },
-  renderPopoverContent(anchor, data) {
-    const { instance } = data;
+  renderPopoverContent(anchor, data, onClose = () => null) {
+    const { instance, name = '[Anoymous Component]' } = data;
     const root = rootMap.get(anchor) || ReactDOM.createRoot(anchor);
     rootMap.set(anchor, root);
+    const content = (
+      <Space align={'end'} vertical>
+        <div className={styles[`${classPrefix}-header`]}>
+          <b>{name}</b>
+            <Button icon={<IconClose />} onClick={() => onClose()} theme={'borderless'} type={'tertiary'} />
+        </div>
+        <PopoverContent instance={instance} />
+      </Space>
+    );
     root.render(
       <Popover
         visible
+        onEscKeyDown={() => onClose()}
         trigger={'custom'}
         motion={false}
-        content={<PopoverContent instance={instance} />}
+        content={content}
         position={'leftBottom'}
       >
         <div style={{ width: '100%', height: '100%' }}></div>

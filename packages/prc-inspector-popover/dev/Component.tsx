@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Extendable } from '@shinda-sakana/pluggable-react-component';
 import { ComponentFoundation } from './foundation';
 import { Button, Input } from '@douyinfe/semi-ui';
@@ -15,7 +15,10 @@ export default Extendable(
   ComponentFoundation,
   function useAdapter() {
     return {
-      states: {},
+      states: {
+        inputValue: useState(''),
+        clickCount: useState(0),
+      },
       context: {},
     };
   }

@@ -3,6 +3,9 @@ import ReactDOM from 'react-dom';
 import { BaseFoundation, Plugin } from '@shinda-sakana/pluggable-react-component';
 import { InspectorInstance, removeGlobalInstance, setGlobalInstance } from './instance';
 import { getDataSwap } from './swap';
+import styles from './index.module.scss';
+
+const classPrefix = 'prc-inspector-plugin';
 
 export * from './const';
 
@@ -28,43 +31,30 @@ function InspectorRender(props: {
   instance: InspectorInstance;
   targetRef: React.MutableRefObject<TargetWrapper>;
 }) {
+  const {
+    renderPopoverContent = () => null,
+    destroyPopoverContent = () => null,
+  } = getDataSwap();
   const { instance, targetRef } = props;
-  const coverRef = useRef<HTMLDivElement>();
+  const anchorRef = useRef<HTMLDivElement>();
   const [visible, setVisible] = useState(false);
+  const [popoverVisible, setPopoverVisible] = useState(false);
 
-  const renderInspector = () => {
-    const {
-      renderPopoverContent = () => null,
-    } = getDataSwap();
+  const reshapeAnchor = () => {
     const elem = ReactDOM.findDOMNode(targetRef.current);
-    const { current: cover } = coverRef;
-    if (!(elem instanceof Element) || !cover) {
+    const { current: anchor } = anchorRef;
+    if (!(elem instanceof Element) || !anchor) {
       return;
     }
     const { width, height, top, left } = elem.getBoundingClientRect();
-    Object.assign(cover.style, {
-      pointerEvents: 'none',
+    Object.assign(anchor.style, {
       position: 'absolute',
       width: `${width}px`,
       height: `${height}px`,
       top: `${top}px`,
       left: `${left}px`,
     });
-    renderPopoverContent(cover, {
-      instance,
-    });
   };
-
-  useEffect(() => {
-    const {
-      destroyPopoverContent = () => null,
-    } = getDataSwap();
-    if (visible) {
-      renderInspector();
-    } else {
-      destroyPopoverContent();
-    }
-  }, [visible]);
 
   useEffect(() => {
     const keydownHandler = (e: KeyboardEvent) => {
@@ -87,11 +77,41 @@ function InspectorRender(props: {
     };
   }, []);
 
-  if (!visible) {
-    return null;
+  const clickCover = () => {
+    setPopoverVisible(true);
+  };
+
+  const anchorElem = anchorRef.current?.firstElementChild as HTMLElement;
+  switch (true) {
+    case !anchorElem: {
+      break;
+    }
+    case popoverVisible: {
+      renderPopoverContent(anchorElem, { instance }, () => setPopoverVisible(false));
+      break;
+    }
+    default: {
+      destroyPopoverContent(anchorElem);
+    }
   }
 
-  return ReactDOM.createPortal(<div ref={coverRef}></div>, document.body);
+  return ReactDOM.createPortal(
+    <div
+      ref={anchorRef}
+      className={styles[`${classPrefix}-anchor`]}
+      style={{ pointerEvents: visible ? 'all' : 'none' }}
+    >
+      <div></div>
+      {visible && (
+        <div
+          ref={reshapeAnchor}
+          className={styles[`${classPrefix}-cover`]}
+          onClick={clickCover}
+        />
+      )}
+    </div>,
+    document.body
+  );
 }
 
 export default function InspectorPlugin(): Plugin<BaseFoundation> {

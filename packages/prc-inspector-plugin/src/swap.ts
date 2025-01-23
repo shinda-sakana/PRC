@@ -3,10 +3,11 @@ import { InspectorInstance } from './instance';
 
 interface RenderData {
   instance: InspectorInstance;
+  name?: string;
 }
 
 export interface DataSwap {
-  renderPopoverContent(anchor: HTMLElement, data: RenderData): void;
+  renderPopoverContent(anchor: HTMLElement, data: RenderData, onClose?: () => void): void;
   destroyPopoverContent(anchor?: HTMLElement): void;
   sniffActive(handler: (isActive: boolean) => void): void;
   isActive(): boolean;
