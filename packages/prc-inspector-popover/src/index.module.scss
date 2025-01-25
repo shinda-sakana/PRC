@@ -21,4 +21,19 @@
     overflow: overlay;
     max-height: 60vh;
   }
+  &-display-item {
+    animation: displayItemInitialize 0.5s;
+  }
+}
+
+@keyframes displayItemInitialize {
+  0% {
+    background-color: rgba(255, 255, 255, 0);
+  }
+  50% {
+    background-color: rgba(0, 160, 210, 0.3);
+  }
+  100% {
+    background-color: rgba(255, 255, 255, 0);
+  }
 }

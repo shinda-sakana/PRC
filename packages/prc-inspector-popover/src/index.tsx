@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { SWAP_KEY, DataSwap, InspectorInstance } from '@shinda-sakana/prc-inspector-plugin';
 import { Button, Collapse, Descriptions, List, Popover, Space, Tabs } from '@douyinfe/semi-ui';
@@ -35,6 +35,48 @@ function FoundationPane(props: {
   );
 }
 
+interface EventEntity {
+  event: string;
+  payloads: unknown[];
+  retValue: unknown;
+}
+
+function EventsDisplayItem(props: {
+  item: EventEntity;
+}) {
+  const { item } = props;
+  const initedRef = useRef(false);
+  const mainInit = (mainElem: HTMLDivElement) => {
+    if (!mainElem || initedRef.current) {
+      return null;
+    }
+    initedRef.current = true;
+    mainElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+  };
+  return (
+    <List.Item
+      className={styles[`${classPrefix}-display-item`]}
+      header={<b>{item.event}</b>}
+      main={(
+        <div ref={mainInit}>
+          <Descriptions
+            data={[
+              ...Array.from(item.payloads, (payload, index) => ({
+                key: `Payload ${index}`,
+                value: <ObjectInspector data={payload} />
+              })),
+              {
+                key: 'Return',
+                value: <ObjectInspector data={item.retValue} />
+              }
+            ]}
+          />
+        </div>
+      )}
+    />
+  );
+}
+
 function EventsTracePane(props: {
   instance: InspectorInstance;
 }) {
@@ -67,25 +109,7 @@ function EventsTracePane(props: {
       <List
         style={{ width: '100%' }}
         dataSource={[...instance.logger.read()]}
-        renderItem={item => (
-          <List.Item
-            header={<b>{item.event}</b>}
-            main={(
-              <Descriptions
-                data={[
-                  ...Array.from(item.payloads, (payload, index) => ({
-                    key: `Payload ${index}`,
-                    value: <ObjectInspector data={payload} />
-                  })),
-                  {
-                    key: 'Return',
-                    value: <ObjectInspector data={item.retValue} />
-                  }
-                ]}
-              />
-            )}
-          />
-        )}
+        renderItem={item => <EventsDisplayItem item={item} />}
       />
     </>
   )
