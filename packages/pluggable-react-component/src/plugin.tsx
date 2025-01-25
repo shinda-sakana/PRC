@@ -5,6 +5,7 @@ import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { AdapterBase, BaseFoundation, SlotKeys, PartialSlotMap, States, TDefaultContext, TDefaultEventsMap, TDefaultProps, TDefaultSlots, TDefaultStates, SlotOptions, ExcludeSelfSlotKeys } from './base';
 import { compose } from './utils';
 import get from 'lodash/get';
+import FeatureFlags from './featureFlags';
 
 type FoundationSlots<F extends BaseFoundation> = (
   F extends BaseFoundation<
@@ -142,6 +143,9 @@ export function Extendable<F extends BaseFoundation, T>(
       props: newProps,
       context: newContext,
     }));
+    if (FeatureFlags.BaseFoundationSyncStates) {
+      Reflect.set(foundation, 'syncStates', foundation.getStates());
+    }
     Reflect.set(foundation, 'slotMap', {});
     preRenders.forEach(pre => {
       const slotMap = pre.render(foundation);

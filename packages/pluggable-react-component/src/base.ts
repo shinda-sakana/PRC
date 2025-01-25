@@ -1,6 +1,7 @@
 import type { Dispatch, SetStateAction } from 'react';
 import isFunction from 'lodash/isFunction';
 import set from 'lodash/set';
+import FeatureFlags from './featureFlags';
 
 type StatePair<T> = [T, Dispatch<SetStateAction<T>>];
 
@@ -69,6 +70,7 @@ export class BaseFoundation<
   private eventsMap: EventsMap<E> = {};
   private anyEventsHandlers: Set<DefaultHandler>;
   private base: AdapterBase<P, States<S>, C>;
+  private syncStates: Partial<S>;
   getState<K extends keyof S>(key: K): undefined | S[K] {
     if (!this.base) {
       return void 0;
@@ -102,6 +104,11 @@ export class BaseFoundation<
       const setState = state[1];
       if (isFunction(setState)) {
         setState(val);
+        if (FeatureFlags.BaseFoundationSyncStates) {
+          this.syncStates = Object.assign({}, this.getStates(), {
+            [key]: val,
+          });
+        }
       }
     }
     if (arguments.length < 2) {
@@ -136,7 +143,12 @@ export class BaseFoundation<
     };
   }
   listenAnyEvents(
-    handler: (event: string, payloads: unknown[], ret: unknown) => void
+    handler: (
+      event: string,
+      payloads: unknown[],
+      ret: unknown,
+      extraArguments: Record<string, unknown>
+    ) => void
   ) {
     const handlers = this.anyEventsHandlers || new Set();
     handlers.add(handler);

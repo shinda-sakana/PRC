@@ -31,11 +31,12 @@ export class InspectorInstance {
     this.foundation = f;
     const logger = new EventLogger();
     this.logger = logger;
-    f.listenAnyEvents((event, payloads, retValue) => {
+    f.listenAnyEvents((event, payloads, retValue, extraArguments) => {
       logger.log({
         event,
         payloads,
         retValue,
+        extraArguments,
       });
       this.handleUpdate();
     });

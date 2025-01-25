@@ -2,6 +2,7 @@ interface EventEntity {
   event: string;
   payloads: unknown[];
   retValue: unknown;
+  extraArguments: Record<string, unknown>;
 }
 
 export class EventLogger {

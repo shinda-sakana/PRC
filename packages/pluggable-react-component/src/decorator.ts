@@ -3,6 +3,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import isFunction from 'lodash/isFunction';
 import { BaseFoundation, EventsMap, TDefaultContext, TDefaultProps, TDefaultSlots, TDefaultStates } from './base';
+import FeatureFlags from './featureFlags';
+import differenceWith from 'lodash/differenceWith';
+import isEqual from 'lodash/isEqual';
 
 type AnyF<F> = F extends (...args: infer A) => void ? (...args: A) => any : never;
 type VMap<M, E> = M extends EventsMap<infer Map> ? E extends keyof Map ? Map[E]: never : never;
@@ -18,6 +21,20 @@ type EMap<F extends BaseFoundation> = (
     ? EventsMap<E>
     : never
 );
+
+function diffStates(
+  oldStates: Record<string, unknown>,
+  newStates: Record<string, unknown>
+) {
+  return differenceWith(
+    Object.entries(oldStates),
+    Object.entries(newStates),
+    isEqual
+  ).map(([key, oldValue]) => {
+    const newValue = newStates[key];
+    return [key, oldValue, newValue];
+  });
+}
 
 export const Event = function <
   F extends BaseFoundation,
@@ -35,7 +52,27 @@ export const Event = function <
         configurable: true,
         value: function (this: F, ...args: unknown[]) {
           const eventsMap = Reflect.get(this, 'eventsMap');
+          let costTime = Number.NaN;
+          let stateDiff = null;
+          // mapping feature flags before call function
+          switch (true) {
+            case FeatureFlags.EventDispatcherDiffStates: {
+              stateDiff = Reflect.get(this, 'syncStates') || {};
+            }
+            case FeatureFlags.EventDispatcherCalcCostTime: {
+              costTime = performance.now();
+            }
+          }
           const ret = old.call(this, ...args);
+          // mapping feature flags after call functions
+          switch (true) {
+            case FeatureFlags.EventDispatcherCalcCostTime: {
+              costTime = performance.now() - costTime;
+            }
+            case FeatureFlags.EventDispatcherDiffStates: {
+              stateDiff = diffStates(stateDiff, Reflect.get(this, 'syncStates') || {});
+            }
+          }
           const handlers = eventsMap[event as string];
           const anyEventsHandlers = Reflect.get(this, 'anyEventsHandlers');
           switch (true) {
@@ -48,7 +85,17 @@ export const Event = function <
             }
             case (anyEventsHandlers instanceof Set): {
               try {
-                anyEventsHandlers.forEach(handler => handler(event, args, ret));
+                const extraArguments = {};
+                // mapping feature flags and assign extra properties
+                switch (true) {
+                  case FeatureFlags.EventDispatcherCalcCostTime: {
+                    Object.assign(extraArguments, { costTime });
+                  }
+                  case FeatureFlags.EventDispatcherDiffStates: {
+                    Object.assign(extraArguments, { stateDiff });
+                  }
+                }
+                anyEventsHandlers.forEach(handler => handler(event, args, ret, extraArguments));
               } catch (e) {
                 console.error(e);
               }

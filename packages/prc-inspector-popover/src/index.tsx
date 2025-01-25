@@ -6,8 +6,13 @@ import { BaseFoundation } from '@shinda-sakana/pluggable-react-component';
 import { ObjectInspector } from 'react-inspector';
 import { IconClose, IconPlay, IconStop } from '@douyinfe/semi-icons';
 import styles from './index.module.scss';
+import { setFlagBaseFoundationSyncStates, setFlagEventDispatcherClacCostTime, setFlagEventDispatcherDiffStates } from '@shinda-sakana/pluggable-react-component/src/featureFlags';
 
 const classPrefix = 'prc-inspector-popover';
+
+setFlagEventDispatcherClacCostTime(true);
+setFlagEventDispatcherDiffStates(true);
+setFlagBaseFoundationSyncStates(true);
 
 function FoundationPane(props: {
   foundation: BaseFoundation;
@@ -39,6 +44,14 @@ interface EventEntity {
   event: string;
   payloads: unknown[];
   retValue: unknown;
+  extraArguments: Record<string, unknown>;
+}
+
+function map<T>(maybeArray: unknown, mapFunc: (item: unknown) => T): T[] {
+  if (!Array.isArray(maybeArray)) {
+    return [];
+  }
+  return Array.from(maybeArray, mapFunc);
 }
 
 function EventsDisplayItem(props: {
@@ -53,24 +66,44 @@ function EventsDisplayItem(props: {
     initedRef.current = true;
     mainElem.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
   };
+  const renderData = Array.from(item.payloads, (payload, index) => ({
+    key: `Payload ${index}`,
+    value: <ObjectInspector data={payload} />
+  }));
+  renderData.push({
+    key: 'Return',
+    value: <ObjectInspector data={item.retValue} />
+  });
+  const { extraArguments } = item;
+  const { stateDiff, costTime } = extraArguments || {};
+  switch (true) {
+    case typeof costTime === 'number': {
+      renderData.push({
+        key: 'Cost Time',
+        value: <div>{costTime}ms</div>
+      });
+    }
+    case Array.isArray(stateDiff): {
+      renderData.push(...map(stateDiff, ([key, oldValue, newValue]) => ({
+        key: `States Diff(${key})`,
+        value: (
+          <ObjectInspector
+            data={{
+              oldValue,
+              newValue,
+            }}
+          />
+        )
+      })));
+    }
+  }
   return (
     <List.Item
       className={styles[`${classPrefix}-display-item`]}
       header={<b>{item.event}</b>}
       main={(
         <div ref={mainInit}>
-          <Descriptions
-            data={[
-              ...Array.from(item.payloads, (payload, index) => ({
-                key: `Payload ${index}`,
-                value: <ObjectInspector data={payload} />
-              })),
-              {
-                key: 'Return',
-                value: <ObjectInspector data={item.retValue} />
-              }
-            ]}
-          />
+          <Descriptions data={renderData} />
         </div>
       )}
     />
