@@ -2,7 +2,7 @@
 /* eslint-disable object-shorthand */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import isFunction from 'lodash/isFunction';
-import { BaseFoundation, EventsMap, TDefaultContext, TDefaultProps, TDefaultSlots, TDefaultStates } from './base';
+import { BaseFoundation, DefaultHandler, EventsMap, TDefaultContext, TDefaultProps, TDefaultSlots, TDefaultStates } from './base';
 
 type AnyF<F> = F extends (...args: infer A) => void ? (...args: A) => any : never;
 type VMap<M, E> = M extends EventsMap<infer Map> ? E extends keyof Map ? Map[E]: never : never;
@@ -18,6 +18,17 @@ type EMap<F extends BaseFoundation> = (
     ? EventsMap<E>
     : never
 );
+
+function dispatchEventHandlers(handlers: Set<DefaultHandler>, ...args: unknown[]) {
+  if (!(handlers instanceof Set)) {
+    return;
+  }
+  try {
+    handlers.forEach(handler => handler(...args));
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 export const Event = function <
   F extends BaseFoundation,
@@ -38,22 +49,8 @@ export const Event = function <
           const ret = old.call(this, ...args);
           const handlers = eventsMap[event as string];
           const anyEventsHandlers = Reflect.get(this, 'anyEventsHandlers');
-          switch (true) {
-            case (handlers instanceof Set): {
-              try {
-                handlers.forEach(handler => handler(...args));
-              } catch (e) {
-                console.error(e);
-              }
-            }
-            case (anyEventsHandlers instanceof Set): {
-              try {
-                anyEventsHandlers.forEach(handler => handler(event, args, ret));
-              } catch (e) {
-                console.error(e);
-              }
-            }
-          }
+          dispatchEventHandlers(handlers, ...args);
+          dispatchEventHandlers(anyEventsHandlers, event, args, ret);
           return ret;
         }
       };

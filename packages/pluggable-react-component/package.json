@@ -12,7 +12,9 @@
   "scripts": {
     "start": "vite",
     "build": "vite build",
-    "showcase": "vite --config vite.showcase.config.ts"
+    "showcase": "vite --config vite.showcase.config.ts",
+    "test": "vitest",
+    "coverage": "vitest run --coverage"
   },
   "keywords": [
     "react",
